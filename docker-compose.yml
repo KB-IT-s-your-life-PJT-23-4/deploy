@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ../backend
+    container_name: mirizoom-backend
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST} # RDS 엔드포인트
+      DB_PORT: 3306
+      DB_NAME: mirizoom
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      FASTAPI_BASE_URL: http://fastapi:8000
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      AI_CRYPTO_KEY_V1: ${AI_CRYPTO_KEY_V1}
+    expose:
+      - '8080'
+
+  fastapi:
+    build:
+      context: ../FastApi
+    container_name: mirizoom-fastapi
+    restart: always
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    expose:
+      - '8000'
+
+  nginx:
+    build:
+      context: ../frontend
+      args:
+        VITE_KAKAO_JS_KEY: ${VITE_KAKAO_JS_KEY}
+    container_name: mirizoom-nginx
+    restart: always
+    depends_on:
+      - backend
+      - fastapi
+    ports:
+      - '80:80'
