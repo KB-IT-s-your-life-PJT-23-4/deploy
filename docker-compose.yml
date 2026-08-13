@@ -7,7 +7,7 @@ services:
     container_name: mirizoom-backend
     restart: always
     environment:
-      DB_HOST: ${DB_HOST} # RDS 엔드포인트
+      DB_HOST: ${DB_HOST}
       DB_PORT: 3306
       DB_NAME: mirizoom
       DB_USERNAME: ${DB_USERNAME}
@@ -26,6 +26,7 @@ services:
     restart: always
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_EMBEDDING_API_KEY: ${OPENAI_EMBEDDING_API_KEY:-${OPENAI_API_KEY}}
     expose:
       - '8000'
 
