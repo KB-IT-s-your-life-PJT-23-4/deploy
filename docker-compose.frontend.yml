@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  nginx:
+    image: ssohy/mirizoom-frontend:${IMAGE_TAG:-latest}
+    container_name: mirizoom-nginx
+    restart: always
+    ports:
+      - '80:80'
