@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   backend:
-    image: ssohy/mirizoom-backend:${IMAGE_TAG:-latest}
+    image: wosyh18/mirizoom-backend:${IMAGE_TAG:-latest}
     container_name: mirizoom-backend
     restart: always
     environment:
@@ -22,7 +22,7 @@ services:
       - '8080:8080'
 
   fastapi:
-    image: ssohy/mirizoom-fastapi:${IMAGE_TAG:-latest}
+    image: wosyh18/mirizoom-fastapi:${IMAGE_TAG:-latest}
     container_name: mirizoom-fastapi
     restart: always
     environment:
