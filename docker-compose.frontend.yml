@@ -1,9 +1,13 @@
-version: '3.9'
-
 services:
   nginx:
-    image: wosyh18/mirizoom-frontend:${IMAGE_TAG:-latest}
+    image: wosyh18/mirizoom-frontend:${FRONTEND_TAG:-latest}
     container_name: mirizoom-nginx
-    restart: always
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: ${BACKEND_HOST:?BACKEND_HOST is required}
+      BACKEND_PORT: ${BACKEND_PORT:-8080}
+      NGINX_ENVSUBST_FILTER: '^(BACKEND_HOST|BACKEND_PORT)$'
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
     ports:
       - '80:80'

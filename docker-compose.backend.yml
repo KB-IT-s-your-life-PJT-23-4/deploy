@@ -1,32 +1,53 @@
-version: '3.9'
-
 services:
   backend:
-    image: wosyh18/mirizoom-backend:${IMAGE_TAG:-latest}
+    image: wosyh18/mirizoom-backend:${BACKEND_TAG:-latest}
     container_name: mirizoom-backend
-    restart: always
+    restart: unless-stopped
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: 3306
-      DB_NAME: mirizoom
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST:?DB_HOST is required}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-mirizoom}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       FASTAPI_BASE_URL: http://fastapi:8000
-      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
-      JWT_SECRET: ${JWT_SECRET}
-      AI_CRYPTO_KEY_V1: ${AI_CRYPTO_KEY_V1}
-      CLOVA_OCR_INVOKE_URL: ${CLOVA_OCR_INVOKE_URL}
-      CLOVA_OCR_SECRET: ${CLOVA_OCR_SECRET}
-      PII_HMAC_KEY_V1: ${PII_HMAC_KEY_V1}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:?KAKAO_REST_API_KEY is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      AI_CRYPTO_KEY_V1: ${AI_CRYPTO_KEY_V1:?AI_CRYPTO_KEY_V1 is required}
+      CLOVA_OCR_INVOKE_URL: ${CLOVA_OCR_INVOKE_URL:-}
+      CLOVA_OCR_SECRET: ${CLOVA_OCR_SECRET:-}
+      PII_HMAC_KEY_V1: ${PII_HMAC_KEY_V1:?PII_HMAC_KEY_V1 is required}
+    depends_on:
+      fastapi:
+        condition: service_healthy
     ports:
       - '8080:8080'
+    networks:
+      - mirizoom-app
 
   fastapi:
-    image: wosyh18/mirizoom-fastapi:${IMAGE_TAG:-latest}
+    image: wosyh18/mirizoom-fastapi:${FASTAPI_TAG:-latest}
     container_name: mirizoom-fastapi
-    restart: always
+    restart: unless-stopped
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      APP_ENV: ${APP_ENV:-production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
       OPENAI_EMBEDDING_API_KEY: ${OPENAI_EMBEDDING_API_KEY:-${OPENAI_API_KEY}}
+      CHROMA_PATH: ${CHROMA_PATH:-/app/storage/chroma}
     expose:
       - '8000'
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    networks:
+      - mirizoom-app
+
+networks:
+  mirizoom-app:
+    name: mirizoom-app
