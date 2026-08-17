@@ -1,13 +1,11 @@
 # ================================= 로컬 테스트용
 
-version: '3.9'
-
 services:
   backend:
     build:
       context: ../backend
     container_name: mirizoom-backend
-    restart: always
+    restart: unless-stopped
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 3306
@@ -21,6 +19,9 @@ services:
       CLOVA_OCR_INVOKE_URL: ${CLOVA_OCR_INVOKE_URL}
       CLOVA_OCR_SECRET: ${CLOVA_OCR_SECRET}
       PII_HMAC_KEY_V1: ${PII_HMAC_KEY_V1}
+    depends_on:
+      fastapi:
+        condition: service_healthy
     expose:
       - '8080'
 
@@ -28,22 +29,40 @@ services:
     build:
       context: ../FastApi
     container_name: mirizoom-fastapi
-    restart: always
+    restart: unless-stopped
     environment:
+      APP_ENV: local
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_EMBEDDING_API_KEY: ${OPENAI_EMBEDDING_API_KEY:-${OPENAI_API_KEY}}
+      CHROMA_PATH: /app/storage/chroma
     expose:
       - '8000'
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
 
   nginx:
     build:
       context: ../frontend
       args:
+        VITE_API_BASE_URL: /api
         VITE_KAKAO_JS_KEY: ${VITE_KAKAO_JS_KEY}
     container_name: mirizoom-nginx
-    restart: always
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: 8080
+      NGINX_ENVSUBST_FILTER: '^(BACKEND_HOST|BACKEND_PORT)$'
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
     depends_on:
       - backend
-      - fastapi
     ports:
       - '80:80'
