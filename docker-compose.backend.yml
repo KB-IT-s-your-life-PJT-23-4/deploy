@@ -16,6 +16,8 @@ services:
       CLOVA_OCR_INVOKE_URL: ${CLOVA_OCR_INVOKE_URL:-}
       CLOVA_OCR_SECRET: ${CLOVA_OCR_SECRET:-}
       PII_HMAC_KEY_V1: ${PII_HMAC_KEY_V1:?PII_HMAC_KEY_V1 is required}
+      KRX_AUTH_KEY: ${KRX_AUTH_KEY:?KRX_AUTH_KEY is required}
+      FSC_SECURITIES_API_KEY: ${FSC_SECURITIES_API_KEY:?FSC_SECURITIES_API_KEY is required}
     depends_on:
       fastapi:
         condition: service_healthy
