@@ -56,6 +56,22 @@ services:
     networks:
       - mirizoom-app
 
+  batch:
+    image: wosyh18/mirizoom-batch:${BATCH_TAG:-latest}
+    restart: 'no'
+    profiles:
+      - batch
+    environment:
+      DB_HOST: ${DB_HOST:?DB_HOST is required}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-mirizoom}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - ./batch-data:/app/build
+    networks:
+      - mirizoom-app
+
 networks:
   mirizoom-app:
     name: mirizoom-app

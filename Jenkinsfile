@@ -11,7 +11,7 @@ pipeline {
     parameters {
         choice(
             name: 'SERVICE',
-            choices: ['frontend', 'backend', 'fastapi'],
+            choices: ['frontend', 'backend', 'fastapi', 'batch'],
             description: '배포할 서비스'
         )
 
@@ -41,7 +41,7 @@ pipeline {
                     set -eu
 
                     case "$DEPLOY_SERVICE" in
-                        frontend|backend|fastapi)
+                        frontend|backend|fastapi|batch)
                             ;;
                         *)
                             echo "지원하지 않는 서비스입니다: $DEPLOY_SERVICE" >&2
@@ -93,7 +93,7 @@ pipeline {
                                 COMPOSE_FILE='docker-compose.frontend.yml'
                                 ;;
 
-                            backend|fastapi)
+                            backend|fastapi|batch)
                                 TARGET_HOST="$APP_HOST"
                                 COMPOSE_FILE='docker-compose.backend.yml'
                                 ;;

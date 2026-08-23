@@ -28,6 +28,13 @@ case "$SERVICE" in
         TAG_VARIABLE='FASTAPI_TAG'
         ;;
 
+    batch)
+        COMPOSE_FILE='docker-compose.backend.yml'
+        ENV_FILE='app.env'
+        COMPOSE_SERVICE='batch'
+        TAG_VARIABLE='BATCH_TAG'
+        ;;
+
     *)
         echo "지원하지 않는 서비스입니다: $SERVICE" >&2
         exit 1
@@ -68,22 +75,32 @@ fi
 
 echo "${SERVICE}:${IMAGE_TAG} 이미지 Pull"
 
-docker compose \
-    --env-file "$TEMP_ENV" \
-    -f "$COMPOSE_FILE" \
-    pull "$COMPOSE_SERVICE"
+if [ "$SERVICE" = 'batch' ]; then
+    docker compose \
+        --profile batch \
+        --env-file "$TEMP_ENV" \
+        -f "$COMPOSE_FILE" \
+        pull "$COMPOSE_SERVICE"
 
-echo "${SERVICE}:${IMAGE_TAG} 컨테이너 적용"
+    echo "${SERVICE}:${IMAGE_TAG} 이미지 준비 완료 (스케줄 실행 대기)"
+else
+    docker compose \
+        --env-file "$TEMP_ENV" \
+        -f "$COMPOSE_FILE" \
+        pull "$COMPOSE_SERVICE"
 
-docker compose \
-    --env-file "$TEMP_ENV" \
-    -f "$COMPOSE_FILE" \
-    up -d --no-deps "$COMPOSE_SERVICE"
+    echo "${SERVICE}:${IMAGE_TAG} 컨테이너 적용"
 
-docker compose \
-    --env-file "$TEMP_ENV" \
-    -f "$COMPOSE_FILE" \
-    ps "$COMPOSE_SERVICE"
+    docker compose \
+        --env-file "$TEMP_ENV" \
+        -f "$COMPOSE_FILE" \
+        up -d --no-deps "$COMPOSE_SERVICE"
+
+    docker compose \
+        --env-file "$TEMP_ENV" \
+        -f "$COMPOSE_FILE" \
+        ps "$COMPOSE_SERVICE"
+fi
 
 mv "$TEMP_ENV" "$ENV_FILE"
 trap - EXIT
