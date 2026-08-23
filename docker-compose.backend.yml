@@ -67,6 +67,10 @@ services:
       DB_NAME: ${DB_NAME:-mirizoom}
       DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      FSC_SECURITIES_API_KEY: ${FSC_SECURITIES_API_KEY:?FSC_SECURITIES_API_KEY is required}
+      KRX_AUTH_KEY: ${KRX_AUTH_KEY:?KRX_AUTH_KEY is required}
+      AI_CRYPTO_KEY_V1: ${AI_CRYPTO_KEY_V1:?AI_CRYPTO_KEY_V1 is required}
+      PII_HMAC_KEY_V1: ${PII_HMAC_KEY_V1:?PII_HMAC_KEY_V1 is required}
     volumes:
       - ./batch-data:/app/build
     networks:
