@@ -9,10 +9,7 @@ pipeline {
     }
 
     triggers {
-        cron('''
-            TZ=Asia/Seoul
-            H 3 * * 0
-        ''')
+        cron('H 3 * * 0')
     }
 
     environment {
